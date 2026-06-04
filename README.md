@@ -12,6 +12,12 @@
 
 ## Запуск
 
+### Онлайн (GitHub Pages)
+
+[https://partnersimferopol-bit.github.io/bibliya/](https://partnersimferopol-bit.github.io/bibliya/)
+
+См. [docs/GITHUB_PAGES.md](docs/GITHUB_PAGES.md) — настройка деплоя и типичные ошибки.
+
 ### Вариант 1: открыть в браузере без сервера
 
 ```bash

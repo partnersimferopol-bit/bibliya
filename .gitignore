@@ -1,9 +1,6 @@
 node_modules
 .next
 out
-# Статика после npm run build (копия из out/)
-_next
-404.html
 .env*.local
 *.tsbuildinfo
 next-env.d.ts.bak

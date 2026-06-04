@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && node scripts/prepare-static.js",
+    "build:pages": "next build && node scripts/post-pages.js",
     "build:next": "next build",
     "start": "next start",
     "lint": "next lint"

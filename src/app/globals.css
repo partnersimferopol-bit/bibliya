@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sea-deep: #0a1628;
+  --sea-mid: #153660;
+  --gold: #d4a017;
+  --parchment: #f4e4bc;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: linear-gradient(180deg, #0a1628 0%, #0f2744 40%, #153660 100%);
+  color: #f4e4bc;
+}
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.scroll-border {
+  border: 3px solid #b8860b;
+  box-shadow:
+    inset 0 0 30px rgba(212, 160, 23, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(145deg, #3d2817 0%, #5c4033 50%, #3d2817 100%);
+}
+
+.wood-panel {
+  background: linear-gradient(180deg, #4a3228 0%, #3d2817 100%);
+  border: 2px solid #b8860b;
+}
+
+.cell-btn {
+  @apply transition-all duration-150 border border-sea-700/50;
+}
+
+.cell-btn:hover:not(:disabled) {
+  @apply brightness-125 scale-105;
+}
+
+.wave-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='20' viewBox='0 0 100 20'%3E%3Cpath fill='%231e4976' fill-opacity='0.2' d='M0 10 Q25 0 50 10 T100 10 V20 H0Z'/%3E%3C/svg%3E");
+  background-size: 200px 40px;
+  animation: wave-scroll 12s linear infinite;
+}
+
+@keyframes wave-scroll {
+  from { background-position: 0 0; }
+  to { background-position: 200px 0; }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #b8860b;
+  border-radius: 4px;
+}
+
+/* --- Мобильная вёрстка и поле 15×15 --- */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.game-screen {
+  min-height: 0;
+  width: 100%;
+}
+
+.board-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+.battle-board-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--board-cols, 15), var(--cell-size, 1.35rem));
+  width: max-content;
+  margin: 0 auto;
+}
+
+.battle-board-cell {
+  width: var(--cell-size, 1.35rem);
+  height: var(--cell-size, 1.35rem);
+  min-width: var(--cell-size, 1.35rem);
+  min-height: var(--cell-size, 1.35rem);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-cell-icon {
+  font-size: clamp(6px, 2.5vw, 10px);
+  line-height: 1;
+}
+
+/* Телефон: крупные клетки, влезает в экран */
+@media (max-width: 640px) {
+  :root {
+    --cell-size: min(
+      calc((100vw - 2rem) / 15),
+      calc((100dvh - 18rem) / 15),
+      1.65rem
+    );
+  }
+
+  .quiz-panel {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .cell-btn:active:not(:disabled) {
+    filter: brightness(1.3);
+    transform: scale(1.08);
+  }
+}
+
+/* Планшет */
+@media (min-width: 641px) and (max-width: 1024px) {
+  :root {
+    --cell-size: min(calc((100vw - 4rem) / 15), 2rem);
+  }
+}
+
+/* Десктоп */
+@media (min-width: 1025px) {
+  :root {
+    --cell-size: 1.75rem;
+  }
+}
+
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Корабли на своём поле — светлые, хорошо видны на тёмной воде */
+.ship-cell {
+  background: linear-gradient(
+    160deg,
+    #f5e6b8 0%,
+    #e8c96a 45%,
+    #d4a84a 100%
+  );
+  border: 1.5px solid #f0d78c !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 6px rgba(232, 201, 106, 0.45);
+}
+
+.ship-cell:hover:not(:disabled),
+.ship-cell:active:not(:disabled) {
+  filter: brightness(1.08);
+}
