@@ -9,6 +9,7 @@ import { useGameStore } from "@/store/gameStore";
 export default function BattlePhase() {
   const {
     phase,
+    mode,
     currentPlayer,
     player1Board,
     player2Board,
@@ -20,14 +21,22 @@ export default function BattlePhase() {
     lastExplanation,
   } = useGameStore();
 
-  const enemyBoard = player2Board;
+  const ownBoard = currentPlayer === 1 ? player1Board : player2Board;
+  const enemyBoard = currentPlayer === 1 ? player2Board : player1Board;
   const enemyView = getOpponentView(enemyBoard);
-  const ownView = player1Board.cells.map((row) => row.map((c) => c.state));
+  const ownView = ownBoard.cells.map((row) => row.map((c) => c.state));
+
+  const turnLabel =
+    mode === "hotseat"
+      ? `Игрок ${currentPlayer}`
+      : currentPlayer === 1
+        ? "Ваш ход"
+        : "Ход противника";
 
   return (
     <div className="game-screen p-2 sm:p-4 max-w-7xl mx-auto pb-safe">
       <p className="text-center text-gold-400 mb-3 sm:mb-4 text-sm sm:text-base px-2">
-        {currentPlayer === 1 ? "Ваш ход" : "Ход противника"}
+        {turnLabel}
         {message ? ` · ${message}` : ""}
       </p>
 

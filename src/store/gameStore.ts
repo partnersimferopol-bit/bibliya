@@ -163,6 +163,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPhase: (phase) => set({ phase }),
 
   startGame: (mode, questionMode, aiDifficulty = "medium", playerName = "Капитан") => {
+    if (mode === "hotseat") {
+      set({
+        ...freshBoards(),
+        phase: "placement",
+        mode: "hotseat",
+        questionMode,
+        aiDifficulty,
+        ai: null,
+        playerName,
+        message: "Игрок 1: расставьте флот на поле 15×15 (10 кораблей)",
+      });
+      return;
+    }
+
     const ai = new BattleshipAI(aiDifficulty);
     const p2 = autoPlaceFleet(createEmptyBoard());
     set({
@@ -220,10 +234,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ message: "Разместите все корабли или нажмите «Авто»" });
       return;
     }
+
+    if (state.mode === "hotseat" && state.currentPlayer === 1) {
+      set({
+        currentPlayer: 2,
+        placementShipIndex: 0,
+        placementHorizontal: true,
+        message:
+          "Игрок 2: расставьте флот. Не показывайте экран первому игроку!",
+      });
+      return;
+    }
+
     set({
       phase: "quiz",
       currentPlayer: 1,
-      message: "Ответьте на вопрос, чтобы сделать выстрел",
+      message:
+        state.mode === "hotseat"
+          ? "Игрок 1: ответьте на вопрос, чтобы сделать выстрел"
+          : "Ответьте на вопрос, чтобы сделать выстрел",
     });
     get().loadQuestion();
   },
@@ -292,7 +321,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       sessionCorrect,
       stats,
       phase: "battle",
-      message: "Верно! Выберите клетку для выстрела",
+      message:
+        state.mode === "hotseat"
+          ? `Игрок ${state.currentPlayer}: верно! Выберите клетку`
+          : "Верно! Выберите клетку для выстрела",
       lastExplanation: explanation,
       showOpponentBoard: true,
     });

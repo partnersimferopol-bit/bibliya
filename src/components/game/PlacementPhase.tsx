@@ -7,7 +7,10 @@ import { useGameStore } from "@/store/gameStore";
 
 export default function PlacementPhase() {
   const {
+    mode,
+    currentPlayer,
     player1Board,
+    player2Board,
     placementShipIndex,
     placementHorizontal,
     message,
@@ -17,20 +20,26 @@ export default function PlacementPhase() {
     finishPlacement,
   } = useGameStore();
 
+  const activeBoard =
+    mode === "hotseat" && currentPlayer === 2 ? player2Board : player1Board;
+
   const fleet = getFleetShips();
   const currentShip = fleet[placementShipIndex];
-  const view = player1Board.cells.map((row) =>
+  const view = activeBoard.cells.map((row) =>
     row.map(
       (c) => (c.state === "ship" ? "ship" : c.state) as "empty" | "ship" | "hit" | "miss" | "sunk"
     )
   );
+
+  const playerLabel =
+    mode === "hotseat" ? `Игрок ${currentPlayer}` : "Ваше поле";
 
   return (
     <div className="game-screen flex flex-col items-center gap-3 sm:gap-4 p-2 sm:p-4 pb-safe">
       <p className="text-gold-400 text-center max-w-xl text-sm sm:text-base px-2">{message}</p>
       {currentShip && (
         <p className="text-xs sm:text-sm text-parchment/80 text-center">
-          Корабль {placementShipIndex + 1}/{fleet.length}: {currentShip.size} кл. ·{" "}
+          {playerLabel} · корабль {placementShipIndex + 1}/{fleet.length}: {currentShip.size} кл. ·{" "}
           {placementHorizontal ? "→" : "↓"}
         </p>
       )}
@@ -41,7 +50,7 @@ export default function PlacementPhase() {
           showShips
           ownBoard
           onCellClick={(x, y) => tryPlaceShip(x, y)}
-          label="Ваше поле 15×15"
+          label={`${playerLabel} — 15×15`}
         />
       </div>
       <div className="flex flex-wrap gap-2 justify-center w-full max-w-md px-2">
