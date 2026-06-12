@@ -33,7 +33,7 @@ export default function MainMenu({ onPlay, onStats, onCollection }: MainMenuProp
         Библейская Битва
       </p>
       <p className="text-parchment/70 max-w-md mb-8 text-sm md:text-base">
-        Поле 10×10 · 10 кораблей · Викторина перед выстрелом
+        Поле 8×8 · 6 кораблей · Викторина перед выстрелом
       </p>
 
       <div className="wave-bg absolute inset-0 pointer-events-none opacity-30 -z-10" />

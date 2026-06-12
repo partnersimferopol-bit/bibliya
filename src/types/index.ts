@@ -90,14 +90,13 @@ export interface UnlockableTheme {
   unlocked: boolean;
 }
 
-export const BOARD_SIZE = 10;
+export const BOARD_SIZE = 8;
 
-/** 10 кораблей: 1×4, 2×3, 3×2, 4×1 */
+/** 6 кораблей для поля 8×8: 1×3, 2×2, 3×1 */
 export const FLEET_CONFIG = [
-  { size: 4, count: 1 },
-  { size: 3, count: 2 },
-  { size: 2, count: 3 },
-  { size: 1, count: 4 },
+  { size: 3, count: 1 },
+  { size: 2, count: 2 },
+  { size: 1, count: 3 },
 ] as const;
 
 export const FLEET_SHIP_COUNT = FLEET_CONFIG.reduce((n, { count }) => n + count, 0);

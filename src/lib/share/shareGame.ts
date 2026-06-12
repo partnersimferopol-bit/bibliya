@@ -8,7 +8,7 @@ export function getGameUrl(): string {
 }
 
 export function getShareText(): string {
-  return `⚓ Играй со мной в «${GAME_TITLE}»! Библейская викторина и морской бой на поле 10×10.`;
+  return `⚓ Играй со мной в «${GAME_TITLE}»! Библейская викторина и морской бой на поле 8×8.`;
 }
 
 export function getFullShareMessage(): string {
