@@ -172,7 +172,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         aiDifficulty,
         ai: null,
         playerName,
-        message: "Игрок 1: расставьте флот на поле 15×15 (10 кораблей)",
+        message: "Игрок 1: расставьте флот на поле 10×10 (10 кораблей)",
       });
       return;
     }
@@ -188,7 +188,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ai,
       playerName,
       player2Board: p2,
-      message: "Расставьте свой флот на поле 15×15 (10 кораблей)",
+      message: "Расставьте свой флот на поле 10×10 (10 кораблей)",
     });
   },
 

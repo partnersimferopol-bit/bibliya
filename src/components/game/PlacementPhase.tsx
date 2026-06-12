@@ -50,7 +50,7 @@ export default function PlacementPhase() {
           showShips
           ownBoard
           onCellClick={(x, y) => tryPlaceShip(x, y)}
-          label={`${playerLabel} — 15×15`}
+          label={`${playerLabel} — 10×10`}
         />
       </div>
       <div className="flex flex-wrap gap-2 justify-center w-full max-w-md px-2">

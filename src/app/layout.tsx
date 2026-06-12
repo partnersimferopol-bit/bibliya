@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Морской бой: Библейская Битва",
-  description: "Морской бой 15×15 с библейской викториной перед каждым выстрелом",
+  description: "Морской бой 10×10 с библейской викториной перед каждым выстрелом",
   appleWebApp: {
     capable: true,
     title: "Библейская Битва",

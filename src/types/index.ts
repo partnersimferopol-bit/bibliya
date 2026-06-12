@@ -90,7 +90,7 @@ export interface UnlockableTheme {
   unlocked: boolean;
 }
 
-export const BOARD_SIZE = 15;
+export const BOARD_SIZE = 10;
 
 /** 10 кораблей: 1×4, 2×3, 3×2, 4×1 */
 export const FLEET_CONFIG = [
