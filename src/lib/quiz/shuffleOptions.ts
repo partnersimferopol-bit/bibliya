@@ -6,6 +6,7 @@ export interface DisplayOption {
   /** Исходный ключ в данных вопроса */
   sourceKey: AnswerOption;
   text: string;
+  image?: string;
 }
 
 const ALL_KEYS: AnswerOption[] = ["A", "B", "C", "D"];
@@ -27,6 +28,7 @@ export function shuffleQuestionOptions(question: BibleQuestion): DisplayOption[]
     displayKey,
     sourceKey: sourceOrder[i],
     text: question.options[sourceOrder[i]],
+    image: question.optionImages?.[sourceOrder[i]],
   }));
 }
 

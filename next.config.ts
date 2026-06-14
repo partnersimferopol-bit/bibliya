@@ -10,8 +10,10 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: { unoptimized: true },
   basePath,
-  // На GitHub Pages — абсолютные пути; локально — относительные для index.html
   assetPrefix: isGithubPages ? "/bibliya/" : "./",
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
 };
 
 export default nextConfig;

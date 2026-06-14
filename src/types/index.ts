@@ -4,7 +4,8 @@ export type QuestionCategory =
   | "old-testament"
   | "new-testament"
   | "psalms-proverbs"
-  | "general";
+  | "general"
+  | "kids-quiz";
 
 export type AnswerOption = "A" | "B" | "C" | "D";
 
@@ -16,6 +17,14 @@ export interface BibleQuestion {
   correctAnswer: AnswerOption;
   difficulty: Difficulty;
   explanation: string;
+  /** Заголовок сцены (детская викторина) */
+  title?: string;
+  /** Описание основной картинки */
+  scenario?: string;
+  /** Путь к основной картинке вопроса */
+  image?: string;
+  /** Картинки вариантов ответа */
+  optionImages?: Record<AnswerOption, string>;
 }
 
 export type CellState = "empty" | "ship" | "hit" | "miss" | "sunk";
@@ -106,6 +115,7 @@ export const CATEGORY_LABELS: Record<QuestionCategory, string> = {
   "new-testament": "Новый Завет",
   "psalms-proverbs": "Псалмы и Притчи",
   general: "Общие вопросы",
+  "kids-quiz": "Детская викторина",
 };
 
 export const CATEGORY_ICONS: Record<QuestionCategory, string> = {
@@ -113,4 +123,5 @@ export const CATEGORY_ICONS: Record<QuestionCategory, string> = {
   "new-testament": "✝️",
   "psalms-proverbs": "🎵",
   general: "📖",
+  "kids-quiz": "🧒",
 };

@@ -22,6 +22,7 @@ const categories: { id: QuestionMode; label: string }[] = [
   { id: "old-testament", label: `${CATEGORY_ICONS["old-testament"]} ${CATEGORY_LABELS["old-testament"]}` },
   { id: "new-testament", label: `${CATEGORY_ICONS["new-testament"]} ${CATEGORY_LABELS["new-testament"]}` },
   { id: "psalms-proverbs", label: `${CATEGORY_ICONS["psalms-proverbs"]} ${CATEGORY_LABELS["psalms-proverbs"]}` },
+  { id: "kids-quiz", label: `${CATEGORY_ICONS["kids-quiz"]} ${CATEGORY_LABELS["kids-quiz"]}` },
 ];
 
 export default function SetupScreen({ onBack }: SetupScreenProps) {
