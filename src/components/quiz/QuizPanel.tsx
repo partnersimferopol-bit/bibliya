@@ -34,12 +34,6 @@ export default function QuizPanel() {
         {isKids ? "🧒 Детская викторина — выберите картинку-ответ" : "Ваш ход — ответьте на вопрос"}
       </p>
 
-      {isKids && currentQuestion.title && (
-        <p className="text-gold-400 font-display text-lg mb-2 text-center">
-          {currentQuestion.title}
-        </p>
-      )}
-
       {isKids && currentQuestion.image && (
         <div className="mb-4 flex justify-center">
           <img

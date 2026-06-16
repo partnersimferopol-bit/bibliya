@@ -21,8 +21,18 @@ export default function BattlePhase() {
     lastExplanation,
   } = useGameStore();
 
-  const ownBoard = currentPlayer === 1 ? player1Board : player2Board;
-  const enemyBoard = currentPlayer === 1 ? player2Board : player1Board;
+  const ownBoard =
+    mode === "ai"
+      ? player1Board
+      : currentPlayer === 1
+        ? player1Board
+        : player2Board;
+  const enemyBoard =
+    mode === "ai"
+      ? player2Board
+      : currentPlayer === 1
+        ? player2Board
+        : player1Board;
   const enemyView = getOpponentView(enemyBoard);
   const ownView = ownBoard.cells.map((row) => row.map((c) => c.state));
 
