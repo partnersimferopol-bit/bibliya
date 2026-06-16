@@ -164,3 +164,68 @@ body {
 .kids-quiz-main-image {
   max-width: min(100%, 420px);
 }
+
+/* Карточка детской викторины на главном экране */
+.kids-feature-card {
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.35);
+}
+
+/* Юридические страницы */
+.legal-page {
+  color: #f4e4bc;
+  line-height: 1.65;
+}
+
+.legal-section {
+  margin-bottom: 1.75rem;
+}
+
+.legal-section p {
+  margin-bottom: 0.75rem;
+  color: rgba(244, 228, 188, 0.88);
+  font-size: 0.95rem;
+}
+
+.legal-section-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #d4a017;
+  margin-bottom: 0.75rem;
+}
+
+.legal-list {
+  list-style: disc;
+  padding-left: 1.25rem;
+  color: rgba(244, 228, 188, 0.88);
+  font-size: 0.95rem;
+}
+
+.legal-list li {
+  margin-bottom: 0.35rem;
+}
+
+.legal-link,
+.legal-footer-link {
+  color: #d4a017;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.legal-link:hover,
+.legal-footer-link:hover {
+  color: #f0c040;
+}
+
+.legal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(184, 134, 11, 0.25);
+  font-size: 0.9rem;
+}

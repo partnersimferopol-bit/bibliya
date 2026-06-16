@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
+import DonateLink from "@/components/menu/DonateLink";
 import { useGameStore } from "@/store/gameStore";
 
 export default function GameOver() {
@@ -36,6 +37,10 @@ export default function GameOver() {
       <Button size="lg" onClick={resetToMenu}>
         В главное меню
       </Button>
+      <DonateLink
+        className="mt-6"
+        message="Нравится игра? Помогите добавлять новые вопросы и картинки."
+      />
     </motion.div>
   );
 }

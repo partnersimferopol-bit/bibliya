@@ -1,4 +1,4 @@
-export const GAME_TITLE = "Морской бой: Библейская Битва";
+export const GAME_TITLE = "Библейская Битва";
 
 const FALLBACK_URL = "https://partnersimferopol-bit.github.io/bibliya/";
 
@@ -8,7 +8,7 @@ export function getGameUrl(): string {
 }
 
 export function getShareText(): string {
-  return `⚓ Играй со мной в «${GAME_TITLE}»! Библейская викторина и морской бой на поле 8×8.`;
+  return `📖 Играй со мной в «${GAME_TITLE}»! Семейная библейская викторина с соревнованием — есть детский режим с картинками.`;
 }
 
 export function getFullShareMessage(): string {

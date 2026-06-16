@@ -24,6 +24,7 @@ export default function GameApp() {
   const [screen, setScreen] = useState<Screen>("menu");
   const phase = useGameStore((s) => s.phase);
   const initFromStorage = useGameStore((s) => s.initFromStorage);
+  const startGame = useGameStore((s) => s.startGame);
 
   useEffect(() => {
     initFromStorage();
@@ -32,7 +33,7 @@ export default function GameApp() {
   if (phase === "placement") {
     return (
       <main className="min-h-screen min-h-[100dvh] relative flex flex-col">
-        <GameHeader title="⚓ Расстановка флота" />
+        <GameHeader title="📖 Расстановка флота" />
         <PlacementPhase />
       </main>
     );
@@ -41,7 +42,7 @@ export default function GameApp() {
   if (phase === "quiz" || phase === "battle") {
     return (
       <main className="min-h-screen min-h-[100dvh] relative flex flex-col">
-        <GameHeader title="⚓ Библейская Битва" />
+        <GameHeader title="📖 Библейская Битва" />
         <BattlePhase />
       </main>
     );
@@ -60,6 +61,7 @@ export default function GameApp() {
       <div className="p-2 sm:p-4 pb-safe">
         {screen === "menu" && (
           <MainMenu
+            onKidsPlay={() => startGame("ai", "kids-quiz", "easy", "Семья")}
             onPlay={() => setScreen("setup")}
             onStats={() => setScreen("stats")}
             onCollection={() => setScreen("collection")}

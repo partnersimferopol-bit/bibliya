@@ -115,7 +115,7 @@ export const CATEGORY_LABELS: Record<QuestionCategory, string> = {
   "new-testament": "Новый Завет",
   "psalms-proverbs": "Псалмы и Притчи",
   general: "Общие вопросы",
-  "kids-quiz": "Детская викторина",
+  "kids-quiz": "Детская викторина для семьи",
 };
 
 export const CATEGORY_ICONS: Record<QuestionCategory, string> = {

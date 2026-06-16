@@ -29,7 +29,7 @@ export default function StatsPanel({ onBack }: StatsPanelProps) {
 
       <h3 className="text-gold-400 mb-3">🏆 Таблица лидеров</h3>
       {leaderboard.length === 0 ? (
-        <p className="text-parchment/60 text-sm mb-6">Пока пусто — сыграйте первый бой!</p>
+        <p className="text-parchment/60 text-sm mb-6">Пока пусто — сыграйте первую игру!</p>
       ) : (
         <ol className="text-sm space-y-1 mb-6 max-h-48 overflow-y-auto">
           {leaderboard.map((e, i) => (

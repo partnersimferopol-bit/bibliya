@@ -17,19 +17,19 @@ interface SetupScreenProps {
 
 type OpponentMode = "ai" | "friend";
 
-const categories: { id: QuestionMode; label: string }[] = [
+const categories: { id: QuestionMode; label: string; featured?: boolean }[] = [
+  { id: "kids-quiz", label: `${CATEGORY_ICONS["kids-quiz"]} ${CATEGORY_LABELS["kids-quiz"]}`, featured: true },
   { id: "mixed", label: "🎲 Смешанный режим" },
   { id: "old-testament", label: `${CATEGORY_ICONS["old-testament"]} ${CATEGORY_LABELS["old-testament"]}` },
   { id: "new-testament", label: `${CATEGORY_ICONS["new-testament"]} ${CATEGORY_LABELS["new-testament"]}` },
   { id: "psalms-proverbs", label: `${CATEGORY_ICONS["psalms-proverbs"]} ${CATEGORY_LABELS["psalms-proverbs"]}` },
-  { id: "kids-quiz", label: `${CATEGORY_ICONS["kids-quiz"]} ${CATEGORY_LABELS["kids-quiz"]}` },
 ];
 
 export default function SetupScreen({ onBack }: SetupScreenProps) {
   const startGame = useGameStore((s) => s.startGame);
   const [opponent, setOpponent] = useState<OpponentMode>("ai");
   const [aiDiff, setAiDiff] = useState<AIDifficulty>("medium");
-  const [qMode, setQMode] = useState<QuestionMode>("mixed");
+  const [qMode, setQMode] = useState<QuestionMode>("kids-quiz");
   const [name, setName] = useState("Капитан");
 
   const handleStart = () => {
@@ -42,9 +42,12 @@ export default function SetupScreen({ onBack }: SetupScreenProps) {
 
   return (
     <div className="max-w-lg mx-auto p-4 sm:p-6 scroll-border rounded-xl w-full">
-      <h2 className="text-2xl text-gold-400 font-display mb-6 text-center">
-        Подготовка к бою
+      <h2 className="text-2xl text-gold-400 font-display mb-2 text-center">
+        Настройка игры
       </h2>
+      <p className="text-parchment/60 text-sm text-center mb-6">
+        Выберите категорию вопросов и соперника
+      </p>
 
       <p className="text-gold-400 mb-2">Противник</p>
       <div className="flex gap-2 mb-6">
@@ -115,9 +118,13 @@ export default function SetupScreen({ onBack }: SetupScreenProps) {
             key={c.id}
             variant={qMode === c.id ? "primary" : "secondary"}
             size="sm"
+            className={c.featured && qMode !== c.id ? "border-gold-500/40" : ""}
             onClick={() => setQMode(c.id)}
           >
             {c.label}
+            {c.featured && (
+              <span className="ml-2 text-xs opacity-80 font-normal">· для семьи</span>
+            )}
           </Button>
         ))}
       </div>

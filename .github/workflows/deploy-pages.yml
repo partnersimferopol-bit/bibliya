@@ -31,6 +31,8 @@ jobs:
         run: npm run build:pages
         env:
           BUILD_TARGET: github-pages
+          NEXT_PUBLIC_DONATE_URL: ${{ vars.NEXT_PUBLIC_DONATE_URL }}
+          NEXT_PUBLIC_DONATE_LABEL: ${{ vars.NEXT_PUBLIC_DONATE_LABEL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

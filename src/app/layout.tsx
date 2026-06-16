@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Морской бой: Библейская Битва",
-  description: "Морской бой 8×8 с библейской викториной перед каждым выстрелом",
+  title: "Библейская Битва — семейная викторина",
+  description:
+    "Семейная библейская викторина с соревнованием: отвечайте на вопросы и сражайтесь за флот. Детский режим с картинками.",
   appleWebApp: {
     capable: true,
     title: "Библейская Битва",

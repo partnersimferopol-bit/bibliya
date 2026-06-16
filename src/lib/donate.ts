@@ -1,0 +1,15 @@
+/** Ссылка на донаты (Boosty, ЮMoney, Patreon и т.д.) */
+export const DONATE_URL =
+  process.env.NEXT_PUBLIC_DONATE_URL?.trim() || "";
+
+export const DONATE_LABEL =
+  process.env.NEXT_PUBLIC_DONATE_LABEL?.trim() || "Поддержать проект";
+
+export function isDonateEnabled(): boolean {
+  return DONATE_URL.length > 0;
+}
+
+export function openDonatePage(): void {
+  if (!isDonateEnabled()) return;
+  window.open(DONATE_URL, "_blank", "noopener,noreferrer");
+}
