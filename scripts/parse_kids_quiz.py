@@ -16,8 +16,19 @@ LETTER_MAP = {1: "A", 2: "B", 3: "C", 4: "D"}
 
 def find_docx() -> Path:
     for f in ROOT.glob("*.docx"):
-        if "дет" in f.name.lower():
-            return f
+        name_lower = f.name.lower()
+        # Файлы блокировки Word начинаются с "~$" и часто не являются валидным docx-архивом.
+        if name_lower.startswith("~$"):
+            continue
+        if "дет" in name_lower:
+            # На всякий случай проверим, что файл реально является zip-архивом.
+            try:
+                with zipfile.ZipFile(f) as z:
+                    # Достаточно открыть архив; дальше распарсим document.xml
+                    z.namelist()
+                return f
+            except zipfile.BadZipFile:
+                continue
     raise FileNotFoundError("вопросы для детской викторины.docx не найден")
 
 
