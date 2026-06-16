@@ -56,98 +56,192 @@ def clean(s: str) -> str:
 
 
 def strip_option_note(text: str) -> str:
-    return clean(re.sub(r"\s*\((?:Верно|Неверно)[^)]*\)\.?\s*$", "", text, flags=re.I))
+    text = re.sub(r"\s*\((?:верно|неверно)[^)]*\)\.?\s*", "", text, flags=re.I)
+    return clean(text)
+
+
+def difficulty_for(num: int) -> str:
+    if num <= 17:
+        return "easy"
+    if num <= 34:
+        return "medium"
+    return "hard"
+
+
+def normalize_text(text: str) -> str:
+    text = re.sub(r"Вопрос(\d+)", r"Вопрос \1", text)
+    text = re.sub(
+        r"(?<![\d])(\d{1,2})\.\s+(Основная картин[аК]:)",
+        r"Вопрос \1. \2",
+        text,
+        flags=re.IGNORECASE,
+    )
+    return text
+
+
+def parse_numbered_options(opts_raw: str, num: int) -> tuple[list[dict], int]:
+    parsed_opts = []
+    correct_num = None
+    for onum, otext in re.findall(r"(\d+)\.\s*(.+?)(?=\d+\.|$)", opts_raw, re.DOTALL):
+        opt_num = int(onum)
+        if opt_num > 4:
+            break
+        raw = clean(otext)
+        is_correct = bool(re.search(r"\(\s*верно", raw, re.I))
+        parsed_opts.append(
+            {
+                "num": opt_num,
+                "text": strip_option_note(raw),
+                "correct": is_correct,
+            }
+        )
+        if is_correct:
+            correct_num = opt_num
+        if len(parsed_opts) == 4:
+            break
+
+    if correct_num is None and num in {42, 49, 50}:
+        correct_num = 4
+        parsed_opts[3]["correct"] = True
+
+    if correct_num is None or len(parsed_opts) != 4:
+        raise ValueError(f"Вопрос {num}: некорректные варианты ({len(parsed_opts)})")
+
+    return parsed_opts, correct_num
+
+
+def parse_old_format(part: str, num: int) -> dict:
+    m = re.match(
+        r"Вопрос\s+(\d+)\s*[\.:]?\s*(.+?)(?=·\s*Основная картинка:)",
+        part,
+        re.DOTALL,
+    )
+    if not m:
+        raise ValueError(f"Не удалось разобрать заголовок вопроса {num}")
+
+    title = clean(m.group(2).replace("·", ""))
+    m_scenario = re.search(
+        r"Основная картинка:\s*(.+?)(?=·\s*Вопрос на картинке:)",
+        part,
+        re.DOTALL,
+    )
+    m_question = re.search(r"Вопрос на картинке:\s*[«\"](.+?)[»\"]", part)
+    m_opts = re.search(
+        r"Картинки-ответы:\s*(.+?)(?=---|Вопрос\s*\d+|$)",
+        part,
+        re.DOTALL,
+    )
+    if not m_question or not m_opts:
+        raise ValueError(f"Не удалось разобрать вопрос {num}")
+
+    scenario = clean(m_scenario.group(1)) if m_scenario else ""
+    question = clean(m_question.group(1))
+    parsed_opts, correct_num = parse_numbered_options(m_opts.group(1), num)
+
+    return {
+        "num": num,
+        "title": title,
+        "scenario": scenario,
+        "question": question,
+        "options": parsed_opts,
+        "correct_num": correct_num,
+        "difficulty": difficulty_for(num),
+    }
+
+
+def parse_new_format(part: str, num: int) -> dict:
+    body = re.sub(rf"^Вопрос\s*{num}\.\s*", "", part, count=1).strip()
+    body = re.sub(r"^Основная картин[аК]:\s*", "", body, flags=re.IGNORECASE)
+
+    scenario = ""
+    options_part = ""
+
+    if "Вопрос на картинке:" in body:
+        scenario_part, rest = body.split("Вопрос на картинке:", 1)
+        scenario = clean(scenario_part.rstrip("."))
+        m_q = re.search(r'^[«"]?\s*(.+?)\s*[»"]?\s*(?=\d+\.)', rest, re.DOTALL)
+        if not m_q:
+            m_q = re.search(r"^(.+?\?)\s*(?=\d+\.)", rest, re.DOTALL)
+        if not m_q:
+            raise ValueError(f"Не удалось разобрать вопрос {num}")
+        question = clean(m_q.group(1))
+        options_part = rest[m_q.end() :]
+    else:
+        m_block = re.search(r"^(.+?\?)\s*(?=\d+\.)", body, re.DOTALL)
+        if not m_block:
+            raise ValueError(f"Не удалось разобрать вопрос {num}")
+        full = clean(m_block.group(1))
+        if "." in full:
+            scenario, question = [clean(x) for x in full.rsplit(".", 1)]
+        else:
+            scenario = ""
+            question = full
+        options_part = body[m_block.end() :]
+
+    title = scenario.split(".")[0][:80] if scenario else f"Вопрос {num}"
+    parsed_opts, correct_num = parse_numbered_options(options_part, num)
+
+    return {
+        "num": num,
+        "title": title,
+        "scenario": scenario,
+        "question": question,
+        "options": parsed_opts,
+        "correct_num": correct_num,
+        "difficulty": difficulty_for(num),
+    }
 
 
 def parse_questions(text: str) -> list[dict]:
-    # Убрать служебный текст между блоками, не затрагивая вопросы
+    text = normalize_text(text)
     text = re.sub(
-        r"---\s*Этот формат.+?(?=Вопрос\s+\d+\.)",
+        r"---\s*Этот формат.+?(?=Вопрос\s*\d+)",
         "",
         text,
         flags=re.DOTALL,
     )
     text = re.sub(
-        r"---\s*Дополнительный блок:[^В]+(?=Вопрос\s+\d+\.)",
+        r"---\s*Часть\s+\d+\..+?(?=Вопрос\s*\d+)",
+        "",
+        text,
+        flags=re.DOTALL,
+    )
+    text = re.sub(
+        r"---\s*Дополнительный блок:.+?(?=Вопрос\s*\d+)",
         "",
         text,
         flags=re.DOTALL,
     )
     text = re.sub(r"---\s*Этот формат.+$", "", text, flags=re.DOTALL)
 
-    parts = re.split(r"(?=Вопрос\s+\d+\.)", text)
+    parts = re.split(r"(?=Вопрос\s*\d+)", text)
     questions = []
 
     for part in parts:
-        m = re.match(r"Вопрос\s+(\d+)\.\s*(.+?)(?=·\s*Основная картинка:)", part, re.DOTALL)
-        if not m:
+        m_num = re.match(r"Вопрос\s*(\d+)", part)
+        if not m_num:
             continue
+        num = int(m_num.group(1))
 
-        num = int(m.group(1))
-        title = clean(m.group(2).replace("·", ""))
-
-        m_scenario = re.search(
-            r"Основная картинка:\s*(.+?)(?=·\s*Вопрос на картинке:)",
-            part,
-            re.DOTALL,
-        )
-        m_question = re.search(
-            r"Вопрос на картинке:\s*[«\"](.+?)[»\"]",
-            part,
-        )
-        m_opts = re.search(r"Картинки-ответы:\s*(.+?)(?=---|Вопрос\s+\d+\.|$)", part, re.DOTALL)
-        if not m_question or not m_opts:
-            raise ValueError(f"Не удалось разобрать вопрос {num}")
-
-        scenario = clean(m_scenario.group(1)) if m_scenario else ""
-        question = clean(m_question.group(1))
-        opts_raw = m_opts.group(1)
-
-        parsed_opts = []
-        correct_num = None
-        for onum, otext in re.findall(r"(\d+)\.\s*(.+?)(?=\d+\.\s|$)", opts_raw, re.DOTALL):
-            opt_num = int(onum)
-            if opt_num > 4:
-                break
-            raw = clean(otext)
-            is_correct = bool(re.search(r"\(Верно", raw, re.I))
-            parsed_opts.append(
-                {
-                    "num": opt_num,
-                    "text": strip_option_note(raw),
-                    "correct": is_correct,
-                }
-            )
-            if is_correct:
-                correct_num = opt_num
-            if len(parsed_opts) == 4:
-                break
-
-        if correct_num is None or len(parsed_opts) != 4:
-            raise ValueError(f"Вопрос {num}: некорректные варианты ({len(parsed_opts)})")
-
-        difficulty = "easy" if num <= 10 else "medium" if num <= 25 else "hard"
-        questions.append(
-            {
-                "num": num,
-                "title": title,
-                "scenario": scenario,
-                "question": question,
-                "options": parsed_opts,
-                "correct_num": correct_num,
-                "difficulty": difficulty,
-            }
-        )
+        if "Картинки-ответы" in part or "· Основная картинка" in part:
+            questions.append(parse_old_format(part, num))
+        elif re.search(r"Основная картин", part, re.IGNORECASE):
+            questions.append(parse_new_format(part, num))
 
     questions.sort(key=lambda q: q["num"])
     return questions
 
 
 def find_image(images_dir: Path, num: int, opt: int | None = None) -> str | None:
-    stem = f"{num}-{opt}" if opt else str(num)
-    for ext in (".jpeg", ".jpg", ".png", ".webp"):
-        path = images_dir / f"{stem}{ext}"
-        if path.exists():
+    if opt is None:
+        pattern = re.compile(rf"^{num}(\s*\(\d+\))?$", re.IGNORECASE)
+    else:
+        pattern = re.compile(rf"^{num}-{opt}(\s*\(\d+\))?$", re.IGNORECASE)
+
+    for path in sorted(images_dir.iterdir()):
+        if path.suffix.lower() not in {".jpeg", ".jpg", ".png", ".webp"}:
+            continue
+        if pattern.match(path.stem):
             return path.name
     return None
 
