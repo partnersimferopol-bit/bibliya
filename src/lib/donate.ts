@@ -1,7 +1,10 @@
-/** Ссылка на донаты (Boosty, ЮMoney, Patreon и т.д.) */
-export const DONATE_URL =
-  process.env.NEXT_PUBLIC_DONATE_URL?.trim() || "";
+/** Страница добровольного пожертвования (ЮMoney) */
+const DEFAULT_DONATE_URL =
+  "https://yoomoney.ru/quickpay/fundraise/button?billNumber=1IF95MPIKG6.260617";
 
+/** Ссылка на донаты; можно переопределить через NEXT_PUBLIC_DONATE_URL */
+export const DONATE_URL =
+  process.env.NEXT_PUBLIC_DONATE_URL?.trim() || DEFAULT_DONATE_URL;
 export const DONATE_LABEL =
   process.env.NEXT_PUBLIC_DONATE_LABEL?.trim() || "Добровольное пожертвование";
 
