@@ -39,7 +39,7 @@ export default function GameOver() {
       </Button>
       <DonateLink
         className="mt-6"
-        message="Нравится игра? Помогите добавлять новые вопросы и картинки."
+        message="Нравится игра? Добровольное пожертвование поможет добавлять новые вопросы и картинки."
       />
     </motion.div>
   );
