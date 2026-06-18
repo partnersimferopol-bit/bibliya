@@ -10,6 +10,7 @@ export default function BattlePhase() {
   const {
     phase,
     mode,
+    questionMode,
     currentPlayer,
     player1Board,
     player2Board,
@@ -21,6 +22,9 @@ export default function BattlePhase() {
     lastExplanation,
     onlineMeta,
   } = useGameStore();
+
+  const isKidsQuiz = questionMode === "kids-quiz";
+  const hideFleetDuringKidsQuiz = isKidsQuiz && phase === "quiz";
 
   const isMyOnlineTurn =
     mode !== "online" || !onlineMeta || currentPlayer === onlineMeta.mySlot;
@@ -67,7 +71,7 @@ export default function BattlePhase() {
       </p>
 
       {phase === "quiz" && currentQuestion && isMyOnlineTurn && (
-        <div className="mb-4">
+        <div className={isKidsQuiz ? "kids-quiz-scroll mb-2" : "mb-4"}>
           <QuizPanel />
         </div>
       )}
@@ -113,11 +117,13 @@ export default function BattlePhase() {
         </motion.div>
       )}
 
-      <div className="flex flex-col items-center border-t border-gold-600/20 pt-4 sm:pt-6">
-        <div className="board-scroll w-full flex justify-center overflow-x-auto overscroll-x-contain px-1">
-          <Board cells={ownView} showShips ownBoard label="Ваш флот" />
+      {!hideFleetDuringKidsQuiz && (
+        <div className="flex flex-col items-center border-t border-gold-600/20 pt-4 sm:pt-6">
+          <div className="board-scroll w-full flex justify-center overflow-x-auto overscroll-x-contain px-1">
+            <Board cells={ownView} showShips ownBoard label="Ваш флот" />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

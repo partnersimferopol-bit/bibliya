@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { useGameStore } from "@/store/gameStore";
@@ -17,6 +18,16 @@ export default function QuizPanel() {
     useHint,
     message,
   } = useGameStore();
+
+  const questionId = currentQuestion?.id;
+
+  useEffect(() => {
+    if (!questionId) return;
+    const t = window.setTimeout(() => {
+      void import("@/lib/vk/vkBridge").then(({ resizeVkWindow }) => resizeVkWindow());
+    }, 150);
+    return () => window.clearTimeout(t);
+  }, [questionId]);
 
   if (!currentQuestion) return null;
 
@@ -39,17 +50,17 @@ export default function QuizPanel() {
           <img
             src={assetPath(currentQuestion.image)}
             alt={currentQuestion.title ?? "Вопрос"}
-            className="kids-quiz-main-image rounded-lg border-2 border-gold-600/50 shadow-lg max-h-[40vh] w-auto object-contain bg-sea-950/50"
+            className="kids-quiz-main-image rounded-lg border-2 border-gold-600/50 shadow-lg w-full max-w-md object-contain bg-sea-950/50"
           />
         </div>
       )}
 
-      <h3 className="text-base sm:text-lg md:text-xl text-parchment mb-4 sm:mb-6 leading-relaxed text-center">
+      <h3 className="text-sm sm:text-base md:text-lg text-parchment mb-3 sm:mb-4 leading-snug text-center">
         {currentQuestion.question}
       </h3>
 
       {isKids ? (
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
           {displayOptions.map((opt) => {
             if (hiddenOptions.includes(opt.displayKey)) return null;
             return (
@@ -66,7 +77,7 @@ export default function QuizPanel() {
                   <img
                     src={assetPath(opt.image)}
                     alt={`Вариант ${opt.displayKey}`}
-                    className="w-full h-auto max-h-32 sm:max-h-40 object-contain rounded"
+                    className="kids-quiz-option-image w-full h-auto object-contain rounded"
                   />
                 ) : (
                   <span className="text-xs text-parchment/80">{opt.text}</span>
