@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 /** GitHub Pages: https://partnersimferopol-bit.github.io/bibliya/ */
-const isGithubPages = process.env.BUILD_TARGET === "github-pages";
+const buildTarget = process.env.BUILD_TARGET ?? "";
+const isGithubPages = buildTarget === "github-pages";
 const basePath = isGithubPages ? "/bibliya" : "";
 
 const nextConfig: NextConfig = {
@@ -13,6 +14,7 @@ const nextConfig: NextConfig = {
   assetPrefix: isGithubPages ? "/bibliya/" : "./",
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
+    NEXT_PUBLIC_BUILD_TARGET: buildTarget,
   },
 };
 

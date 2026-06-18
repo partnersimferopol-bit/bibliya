@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import VkInit from "@/components/VkInit";
 
 export const metadata: Metadata = {
   title: "Библейская Битва — семейная викторина",
@@ -25,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body className="antialiased min-h-screen min-h-[100dvh] overflow-x-hidden">
+        <VkInit />
         {children}
       </body>
     </html>

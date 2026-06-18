@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import ShareInviteButtons from "@/components/menu/ShareInviteButtons";
+import { isOnlineMultiplayerEnabled } from "@/lib/multiplayer/config";
 import { useGameStore } from "@/store/gameStore";
 import {
   AIDifficulty,
@@ -13,9 +14,10 @@ import {
 
 interface SetupScreenProps {
   onBack: () => void;
+  onOnline: (questionMode: QuestionMode, playerName: string) => void;
 }
 
-type OpponentMode = "ai" | "friend";
+type OpponentMode = "ai" | "friend" | "online";
 
 const categories: { id: QuestionMode; label: string; featured?: boolean }[] = [
   { id: "kids-quiz", label: `${CATEGORY_ICONS["kids-quiz"]} ${CATEGORY_LABELS["kids-quiz"]}`, featured: true },
@@ -25,7 +27,7 @@ const categories: { id: QuestionMode; label: string; featured?: boolean }[] = [
   { id: "psalms-proverbs", label: `${CATEGORY_ICONS["psalms-proverbs"]} ${CATEGORY_LABELS["psalms-proverbs"]}` },
 ];
 
-export default function SetupScreen({ onBack }: SetupScreenProps) {
+export default function SetupScreen({ onBack, onOnline }: SetupScreenProps) {
   const startGame = useGameStore((s) => s.startGame);
   const [opponent, setOpponent] = useState<OpponentMode>("ai");
   const [aiDiff, setAiDiff] = useState<AIDifficulty>("medium");
@@ -33,6 +35,10 @@ export default function SetupScreen({ onBack }: SetupScreenProps) {
   const [name, setName] = useState("Капитан");
 
   const handleStart = () => {
+    if (opponent === "online") {
+      onOnline(qMode, name || "Капитан");
+      return;
+    }
     if (opponent === "ai") {
       startGame("ai", qMode, aiDiff, name || "Капитан");
     } else {
@@ -50,11 +56,10 @@ export default function SetupScreen({ onBack }: SetupScreenProps) {
       </p>
 
       <p className="text-gold-400 mb-2">Противник</p>
-      <div className="flex gap-2 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
         <Button
           variant={opponent === "ai" ? "primary" : "secondary"}
           size="sm"
-          className="flex-1"
           onClick={() => setOpponent("ai")}
         >
           🤖 ИИ
@@ -62,25 +67,36 @@ export default function SetupScreen({ onBack }: SetupScreenProps) {
         <Button
           variant={opponent === "friend" ? "primary" : "secondary"}
           size="sm"
-          className="flex-1"
           onClick={() => setOpponent("friend")}
         >
-          👥 Пригласить друга
+          👥 Один телефон
         </Button>
+        {isOnlineMultiplayerEnabled() && (
+          <Button
+            variant={opponent === "online" ? "primary" : "secondary"}
+            size="sm"
+            onClick={() => setOpponent("online")}
+          >
+            🌐 Онлайн
+          </Button>
+        )}
       </div>
 
       {opponent === "ai" ? (
         <p className="text-parchment/70 text-sm text-center mb-4">
           Верный ответ — выстрел; неверный — следующий вопрос
         </p>
-      ) : (
+      ) : opponent === "friend" ? (
         <>
           <ShareInviteButtons />
           <p className="text-parchment/70 text-sm text-center mb-4">
-            Играйте вдвоём на одном устройстве по очереди. Друг может открыть
-            ссылку у себя и сыграть отдельно.
+            Играйте вдвоём на одном устройстве по очереди.
           </p>
         </>
+      ) : (
+        <p className="text-parchment/70 text-sm text-center mb-4">
+          Создайте комнату или войдите по коду — каждый на своём телефоне.
+        </p>
       )}
 
       <label className="block mb-4">
@@ -134,7 +150,7 @@ export default function SetupScreen({ onBack }: SetupScreenProps) {
           ← Назад
         </Button>
         <Button className="flex-1" onClick={handleStart}>
-          Начать расстановку →
+          {opponent === "online" ? "Далее →" : "Начать расстановку →"}
         </Button>
       </div>
     </div>

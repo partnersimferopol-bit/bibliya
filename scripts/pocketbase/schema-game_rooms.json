@@ -1,0 +1,26 @@
+{
+  "name": "game_rooms",
+  "type": "base",
+  "fields": [
+    { "name": "code", "type": "text", "required": true },
+    { "name": "status", "type": "select", "required": true, "values": ["waiting", "placing", "playing", "finished"] },
+    { "name": "question_mode", "type": "text", "required": true },
+    { "name": "host_name", "type": "text", "required": true },
+    { "name": "guest_name", "type": "text" },
+    { "name": "host_placed", "type": "bool" },
+    { "name": "guest_placed", "type": "bool" },
+    { "name": "host_board", "type": "json" },
+    { "name": "guest_board", "type": "json" },
+    { "name": "current_player", "type": "number" },
+    { "name": "phase", "type": "text" },
+    { "name": "message", "type": "text" },
+    { "name": "state_json", "type": "text" }
+  ],
+  "indexes": [
+    "CREATE UNIQUE INDEX idx_room_code ON game_rooms (code)"
+  ],
+  "listRule": "",
+  "viewRule": "",
+  "createRule": "",
+  "updateRule": ""
+}

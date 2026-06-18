@@ -10,7 +10,11 @@ import StatsPanel from "@/components/stats/StatsPanel";
 import CollectionPanel from "@/components/collection/CollectionPanel";
 import { useGameStore } from "@/store/gameStore";
 
-type Screen = "menu" | "setup" | "stats" | "collection";
+import OnlineLobby from "@/components/multiplayer/OnlineLobby";
+import OnlineRoomSync from "@/components/multiplayer/OnlineRoomSync";
+import { QuestionMode } from "@/types";
+
+type Screen = "menu" | "setup" | "online" | "stats" | "collection";
 
 function GameHeader({ title }: { title: string }) {
   return (
@@ -22,6 +26,10 @@ function GameHeader({ title }: { title: string }) {
 
 export default function GameApp() {
   const [screen, setScreen] = useState<Screen>("menu");
+  const [onlineSetup, setOnlineSetup] = useState<{
+    questionMode: QuestionMode;
+    playerName: string;
+  } | null>(null);
   const phase = useGameStore((s) => s.phase);
   const initFromStorage = useGameStore((s) => s.initFromStorage);
   const startGame = useGameStore((s) => s.startGame);
@@ -33,6 +41,7 @@ export default function GameApp() {
   if (phase === "placement") {
     return (
       <main className="min-h-screen min-h-[100dvh] relative flex flex-col">
+        <OnlineRoomSync />
         <GameHeader title="📖 Расстановка флота" />
         <PlacementPhase />
       </main>
@@ -42,6 +51,7 @@ export default function GameApp() {
   if (phase === "quiz" || phase === "battle") {
     return (
       <main className="min-h-screen min-h-[100dvh] relative flex flex-col">
+        <OnlineRoomSync />
         <GameHeader title="📖 Библейская Битва" />
         <BattlePhase />
       </main>
@@ -67,7 +77,22 @@ export default function GameApp() {
             onCollection={() => setScreen("collection")}
           />
         )}
-        {screen === "setup" && <SetupScreen onBack={() => setScreen("menu")} />}
+        {screen === "setup" && (
+          <SetupScreen
+            onBack={() => setScreen("menu")}
+            onOnline={(questionMode, playerName) => {
+              setOnlineSetup({ questionMode, playerName });
+              setScreen("online");
+            }}
+          />
+        )}
+        {screen === "online" && onlineSetup && (
+          <OnlineLobby
+            questionMode={onlineSetup.questionMode}
+            playerName={onlineSetup.playerName}
+            onBack={() => setScreen("setup")}
+          />
+        )}
         {screen === "stats" && <StatsPanel onBack={() => setScreen("menu")} />}
         {screen === "collection" && <CollectionPanel onBack={() => setScreen("menu")} />}
       </div>

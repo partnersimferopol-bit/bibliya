@@ -6,13 +6,17 @@
     "dev": "next dev",
     "build": "next build && node scripts/prepare-static.js",
     "build:pages": "next build && node scripts/post-pages.js",
+    "build:vk": "next build && node scripts/package-vk.js",
+    "package:vk": "node scripts/package-vk.js",
     "build:next": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@vkontakte/vk-bridge": "^3.0.2",
     "framer-motion": "^11.18.0",
     "next": "^15.1.0",
+    "pocketbase": "^0.27.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zustand": "^5.0.3"

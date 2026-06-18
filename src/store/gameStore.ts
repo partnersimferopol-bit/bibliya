@@ -46,6 +46,10 @@ import {
   updateUnlocks,
   DEFAULT_STATS,
 } from "@/lib/storage/persistence";
+import { OnlineMeta } from "@/lib/multiplayer/types";
+import { updateRoom } from "@/lib/multiplayer/roomService";
+import type { GameRoomRecord } from "@/lib/multiplayer/types";
+import { buildOnlineSnapshot, parseOnlineSnapshot } from "@/lib/multiplayer/syncState";
 
 interface GameStore {
   phase: GamePhase;
@@ -76,6 +80,7 @@ interface GameStore {
   playerName: string;
   showOpponentBoard: boolean;
   lastExplanation: string | null;
+  onlineMeta: OnlineMeta | null;
 
   initFromStorage: () => void;
   setPhase: (phase: GamePhase) => void;
@@ -97,6 +102,12 @@ interface GameStore {
   resetToMenu: () => void;
   runAITurn: () => void;
   switchTurnAfterMiss: () => void;
+  startOnlineGame: (
+    meta: OnlineMeta,
+    questionMode: QuestionMode,
+    playerName: string
+  ) => void;
+  applyOnlineRoom: (room: GameRoomRecord) => void;
 }
 
 function freshBoards() {
@@ -120,6 +131,18 @@ function freshBoards() {
     showOpponentBoard: false,
     lastExplanation: null,
   };
+}
+
+async function pushOnlineState(get: () => GameStore): Promise<void> {
+  const state = get();
+  if (state.mode !== "online" || !state.onlineMeta) return;
+  await updateRoom(state.onlineMeta.roomId, {
+    state_json: buildOnlineSnapshot(state),
+    phase: state.phase,
+    current_player: state.currentPlayer,
+    message: state.message,
+    status: state.phase === "gameover" ? "finished" : "playing",
+  });
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -151,6 +174,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   playerName: "Капитан",
   showOpponentBoard: false,
   lastExplanation: null,
+  onlineMeta: null,
 
   initFromStorage: () => {
     set({
@@ -192,6 +216,113 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
+  startOnlineGame: (meta, questionMode, playerName) => {
+    set({
+      ...freshBoards(),
+      phase: "placement",
+      mode: "online",
+      questionMode,
+      ai: null,
+      playerName,
+      onlineMeta: meta,
+      currentPlayer: 1,
+      message:
+        meta.role === "host"
+          ? "Расставьте флот. Дождитесь друга по коду комнаты."
+          : "Расставьте флот на поле 8×8 (6 кораблей)",
+    });
+  },
+
+  applyOnlineRoom: (room) => {
+    const state = get();
+    if (!state.onlineMeta || state.mode !== "online") return;
+
+    if (room.status === "waiting" && state.onlineMeta.role === "host") {
+      set({ message: `Код комнаты: ${room.code}. Ждём друга…` });
+      return;
+    }
+
+    if (room.status === "placing") {
+      const waiting =
+        state.onlineMeta.mySlot === 1
+          ? !room.host_placed
+          : !room.guest_placed;
+      const opponentWaiting =
+        state.onlineMeta.mySlot === 1
+          ? !room.guest_placed
+          : !room.host_placed;
+
+      if (waiting) {
+        set({
+          message:
+            state.placementShipIndex >= getFleetShips().length
+              ? opponentWaiting
+                ? "Флот готов. Ждём соперника…"
+                : "Расставьте все корабли"
+              : "Расставьте флот на поле 8×8 (6 кораблей)",
+        });
+      } else if (opponentWaiting) {
+        set({ message: "Флот готов. Ждём соперника…" });
+      }
+    }
+
+    if (
+      room.host_placed &&
+      room.guest_placed &&
+      room.host_board &&
+      room.guest_board &&
+      state.phase === "placement"
+    ) {
+      const myBoard =
+        state.onlineMeta.mySlot === 1 ? room.host_board : room.guest_board;
+      const enemyBoard =
+        state.onlineMeta.mySlot === 1 ? room.guest_board : room.host_board;
+      set({
+        player1Board: state.onlineMeta.mySlot === 1 ? myBoard : enemyBoard,
+        player2Board: state.onlineMeta.mySlot === 2 ? myBoard : enemyBoard,
+        phase: "quiz",
+        currentPlayer: 1,
+        message:
+          state.onlineMeta.mySlot === 1
+            ? "Ваш ход — ответьте на вопрос"
+            : "Ход соперника…",
+      });
+      if (state.onlineMeta.mySlot === 1) {
+        get().loadQuestion();
+      }
+      updateRoom(room.id, { status: "playing", phase: "quiz" }).catch(() => {});
+      return;
+    }
+
+    if (room.status === "playing") {
+      const snap = parseOnlineSnapshot(room.state_json);
+      if (!snap) return;
+      const prevPlayer = state.currentPlayer;
+      set({
+        player1Board: snap.player1Board,
+        player2Board: snap.player2Board,
+        currentPlayer: snap.currentPlayer,
+        phase: snap.phase,
+        message: snap.message,
+        showOpponentBoard: snap.showOpponentBoard,
+        winner: snap.winner,
+        currentQuestion: snap.currentQuestion,
+        displayOptions: snap.displayOptions ?? [],
+        hiddenOptions: snap.hiddenOptions ?? [],
+        usedQuestionIds: new Set(snap.usedQuestionIds ?? []),
+      });
+      const mySlot = state.onlineMeta.mySlot;
+      if (
+        snap.phase === "quiz" &&
+        snap.currentPlayer === mySlot &&
+        prevPlayer !== mySlot &&
+        !snap.currentQuestion
+      ) {
+        get().loadQuestion();
+      }
+    }
+  },
+
   autoPlaceCurrentPlayer: () => {
     const { currentPlayer, player1Board, player2Board } = get();
     if (currentPlayer === 1) {
@@ -227,11 +358,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
   togglePlacementOrientation: () =>
     set((s) => ({ placementHorizontal: !s.placementHorizontal })),
 
-  finishPlacement: () => {
+  finishPlacement: async () => {
     const state = get();
     const board = state.currentPlayer === 1 ? state.player1Board : state.player2Board;
     if (!allShipsPlaced(board)) {
       set({ message: "Разместите все корабли или нажмите «Авто»" });
+      return;
+    }
+
+    if (state.mode === "online" && state.onlineMeta) {
+      const { roomId, mySlot } = state.onlineMeta;
+      const payload =
+        mySlot === 1
+          ? { host_board: state.player1Board, host_placed: true }
+          : { guest_board: state.player1Board, guest_placed: true };
+      set({ message: "Флот готов. Ждём соперника…" });
+      try {
+        await updateRoom(roomId, {
+          ...payload,
+          status: "placing",
+          message: "Ожидание расстановки соперника",
+        });
+      } catch {
+        set({ message: "Ошибка связи с сервером. Проверьте интернет." });
+      }
       return;
     }
 
@@ -272,11 +422,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       phase: "quiz",
       showOpponentBoard: false,
     });
+    if (get().mode === "online") void pushOnlineState(get);
   },
 
   answerQuestion: (answer) => {
     const state = get();
     if (!state.currentQuestion || state.displayOptions.length === 0) return;
+    if (
+      state.mode === "online" &&
+      state.onlineMeta &&
+      state.currentPlayer !== state.onlineMeta.mySlot
+    ) {
+      return;
+    }
     const correct = isDisplayAnswerCorrect(
       state.currentQuestion,
       answer,
@@ -310,9 +468,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         currentQuestion: null,
         showOpponentBoard: false,
       });
-      setTimeout(() => {
-        get().loadQuestion();
-      }, 2200);
+      if (state.mode === "online") {
+        void pushOnlineState(get);
+        setTimeout(() => get().switchTurnAfterMiss(), 2200);
+      } else {
+        setTimeout(() => get().loadQuestion(), 2200);
+      }
       return;
     }
 
@@ -324,15 +485,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
       message:
         state.mode === "hotseat"
           ? `Игрок ${state.currentPlayer}: верно! Выберите клетку`
-          : "Верно! Выберите клетку для выстрела",
+          : state.mode === "online"
+            ? "Верно! Выберите клетку для выстрела"
+            : "Верно! Выберите клетку для выстрела",
       lastExplanation: explanation,
       showOpponentBoard: true,
     });
+    if (state.mode === "online") void pushOnlineState(get);
   },
 
   shoot: (x, y) => {
     const state = get();
     if (state.phase !== "battle" || !state.showOpponentBoard) return;
+    if (
+      state.mode === "online" &&
+      state.onlineMeta &&
+      state.currentPlayer !== state.onlineMeta.mySlot
+    ) {
+      return;
+    }
     const targetBoard =
       state.currentPlayer === 1 ? state.player2Board : state.player1Board;
     const result = fireAt(targetBoard, x, y);
@@ -357,6 +528,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       get().endGame(state.currentPlayer);
       return;
     }
+
+    if (state.mode === "online") void pushOnlineState(get);
 
     if (result.hit) {
       set({ message: "Попадание! Ответьте на следующий вопрос" });
@@ -395,12 +568,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       message:
         state.mode === "hotseat"
           ? `Игрок ${next}: ваш ход`
-          : next === 2
-            ? "Ход противника (ИИ)"
-            : "Ваш ход",
+          : state.mode === "online"
+            ? state.onlineMeta?.mySlot === next
+              ? "Ваш ход"
+              : "Ход соперника…"
+            : next === 2
+              ? "Ход противника (ИИ)"
+              : "Ваш ход",
     });
     if (state.mode === "ai" && next === 2) {
       setTimeout(() => get().runAITurn(), 800);
+    } else if (state.mode === "online") {
+      void pushOnlineState(get);
+      if (state.onlineMeta?.mySlot === next) {
+        get().loadQuestion();
+      }
     } else {
       get().loadQuestion();
     }
@@ -475,6 +657,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       leaderboard: loadLeaderboard(),
       message: winner === 1 ? "Победа!" : "Поражение",
     });
+    if (state.mode === "online") void pushOnlineState(get);
   },
 
   resetToMenu: () =>
@@ -483,5 +666,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ...freshBoards(),
       ai: null,
       currentQuestion: null,
+      onlineMeta: null,
     }),
 }));

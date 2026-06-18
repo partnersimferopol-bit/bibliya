@@ -10,9 +10,15 @@ import {
   nativeShare,
   openShareWindow,
 } from "@/lib/share/shareGame";
+import {
+  inviteFriendsVk,
+  isVkEnvironment,
+  shareViaVkBridge,
+} from "@/lib/vk/vkBridge";
 
 export default function ShareInviteButtons() {
   const [copied, setCopied] = useState(false);
+  const inVk = isVkEnvironment();
 
   const handleCopy = async () => {
     const ok = await copyGameLink();
@@ -21,6 +27,22 @@ export default function ShareInviteButtons() {
       setTimeout(() => setCopied(false), 2500);
     }
   };
+
+  if (inVk) {
+    return (
+      <div className="flex flex-col gap-2 mb-6">
+        <p className="text-parchment/70 text-sm text-center mb-1">
+          Пригласите друга сыграть в ВКонтакте
+        </p>
+        <Button variant="secondary" size="sm" onClick={() => void inviteFriendsVk()}>
+          👥 Пригласить друзей VK
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => void shareViaVkBridge()}>
+          Поделиться в VK
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2 mb-6">

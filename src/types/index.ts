@@ -58,7 +58,7 @@ export type GamePhase =
   | "battle"
   | "gameover";
 
-export type GameMode = "ai" | "hotseat";
+export type GameMode = "ai" | "hotseat" | "online";
 
 export type AIDifficulty = "easy" | "medium" | "hard";
 

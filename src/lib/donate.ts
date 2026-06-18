@@ -13,7 +13,10 @@ export const DONATE_PURPOSE =
   process.env.NEXT_PUBLIC_DONATE_PURPOSE?.trim() ||
   "Добровольное пожертвование на развитие проекта «Библейская Битва»";
 
+import { isVkEnvironment } from "@/lib/vk/vkBridge";
+
 export function isDonateEnabled(): boolean {
+  if (typeof window !== "undefined" && isVkEnvironment()) return false;
   return DONATE_URL.length > 0;
 }
 

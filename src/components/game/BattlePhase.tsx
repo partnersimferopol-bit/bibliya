@@ -19,29 +19,45 @@ export default function BattlePhase() {
     message,
     currentQuestion,
     lastExplanation,
+    onlineMeta,
   } = useGameStore();
+
+  const isMyOnlineTurn =
+    mode !== "online" || !onlineMeta || currentPlayer === onlineMeta.mySlot;
 
   const ownBoard =
     mode === "ai"
       ? player1Board
-      : currentPlayer === 1
-        ? player1Board
-        : player2Board;
+      : mode === "online" && onlineMeta
+        ? onlineMeta.mySlot === 1
+          ? player1Board
+          : player2Board
+        : currentPlayer === 1
+          ? player1Board
+          : player2Board;
   const enemyBoard =
     mode === "ai"
       ? player2Board
-      : currentPlayer === 1
-        ? player2Board
-        : player1Board;
+      : mode === "online" && onlineMeta
+        ? onlineMeta.mySlot === 1
+          ? player2Board
+          : player1Board
+        : currentPlayer === 1
+          ? player2Board
+          : player1Board;
   const enemyView = getOpponentView(enemyBoard);
   const ownView = ownBoard.cells.map((row) => row.map((c) => c.state));
 
   const turnLabel =
     mode === "hotseat"
       ? `Игрок ${currentPlayer}`
-      : currentPlayer === 1
-        ? "Ваш ход"
-        : "Ход противника";
+      : mode === "online"
+        ? isMyOnlineTurn
+          ? "Ваш ход"
+          : "Ход соперника"
+        : currentPlayer === 1
+          ? "Ваш ход"
+          : "Ход противника";
 
   return (
     <div className="game-screen p-2 sm:p-4 max-w-7xl mx-auto pb-safe">
@@ -50,9 +66,15 @@ export default function BattlePhase() {
         {message ? ` · ${message}` : ""}
       </p>
 
-      {phase === "quiz" && currentQuestion && (
+      {phase === "quiz" && currentQuestion && isMyOnlineTurn && (
         <div className="mb-4">
           <QuizPanel />
+        </div>
+      )}
+
+      {phase === "quiz" && mode === "online" && !isMyOnlineTurn && (
+        <div className="max-w-xl mx-auto p-6 text-center scroll-border rounded-xl mb-4">
+          <p className="text-parchment/80">Ход соперника — ожидайте…</p>
         </div>
       )}
 
@@ -72,7 +94,7 @@ export default function BattlePhase() {
         </p>
       )}
 
-      {phase === "battle" && showOpponentBoard && (
+      {phase === "battle" && showOpponentBoard && isMyOnlineTurn && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
