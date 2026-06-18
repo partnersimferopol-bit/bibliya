@@ -38,9 +38,16 @@ export default function GameApp() {
     initFromStorage();
   }, [initFromStorage]);
 
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      void import("@/lib/vk/vkBridge").then(({ resizeVkWindow }) => resizeVkWindow());
+    }, 100);
+    return () => window.clearTimeout(t);
+  }, [screen, phase]);
+
   if (phase === "placement") {
     return (
-      <main className="min-h-screen min-h-[100dvh] relative flex flex-col">
+      <main className="app-root relative flex flex-col">
         <OnlineRoomSync />
         <GameHeader title="📖 Расстановка флота" />
         <PlacementPhase />
@@ -50,7 +57,7 @@ export default function GameApp() {
 
   if (phase === "quiz" || phase === "battle") {
     return (
-      <main className="min-h-screen min-h-[100dvh] relative flex flex-col">
+      <main className="app-root relative flex flex-col">
         <OnlineRoomSync />
         <GameHeader title="📖 Библейская Битва" />
         <BattlePhase />
@@ -67,8 +74,8 @@ export default function GameApp() {
   }
 
   return (
-    <main className="min-h-screen min-h-[100dvh] relative">
-      <div className="p-2 sm:p-4 pb-safe">
+    <main className="app-root relative">
+      <div className="p-2 sm:p-4 pb-24">
         {screen === "menu" && (
           <MainMenu
             onKidsPlay={() => startGame("ai", "kids-quiz", "easy", "Семья")}

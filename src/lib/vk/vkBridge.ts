@@ -17,10 +17,35 @@ export function isVkEnvironment(): boolean {
 export async function initVkBridge(): Promise<void> {
   if (initialized) return;
   initialized = true;
+  if (typeof document !== "undefined" && isVkEnvironment()) {
+    document.documentElement.classList.add("vk-app");
+  }
   try {
     await bridge.send("VKWebAppInit");
+    await resizeVkWindow();
   } catch {
     /* вне ВК — тихо игнорируем */
+  }
+}
+
+/** Расширить окно VK под высоту контента */
+export async function resizeVkWindow(): Promise<void> {
+  if (typeof document === "undefined") return;
+  const height = Math.ceil(
+    Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight,
+      window.innerHeight,
+      640
+    )
+  );
+  try {
+    await bridge.send("VKWebAppResizeWindow", {
+      width: window.innerWidth,
+      height,
+    });
+  } catch {
+    /* вне VK */
   }
 }
 

@@ -47,7 +47,8 @@ export default function SetupScreen({ onBack, onOnline }: SetupScreenProps) {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-4 sm:p-6 scroll-border rounded-xl w-full">
+    <>
+      <div className="max-w-lg mx-auto p-4 sm:p-6 pb-4 scroll-border rounded-xl w-full">
       <h2 className="text-2xl text-gold-400 font-display mb-2 text-center">
         Настройка игры
       </h2>
@@ -128,7 +129,7 @@ export default function SetupScreen({ onBack, onOnline }: SetupScreenProps) {
       )}
 
       <p className="text-gold-400 mb-2">Категория вопросов</p>
-      <div className="flex flex-col gap-2 mb-8">
+      <div className="flex flex-col gap-2 mb-2">
         {categories.map((c) => (
           <Button
             key={c.id}
@@ -144,15 +145,18 @@ export default function SetupScreen({ onBack, onOnline }: SetupScreenProps) {
           </Button>
         ))}
       </div>
-
-      <div className="flex gap-3">
-        <Button variant="ghost" onClick={onBack}>
-          ← Назад
-        </Button>
-        <Button className="flex-1" onClick={handleStart}>
-          {opponent === "online" ? "Далее →" : "Начать расстановку →"}
-        </Button>
       </div>
-    </div>
+
+      <div className="setup-actions-bar">
+        <div className="max-w-lg mx-auto flex gap-3">
+          <Button variant="ghost" onClick={onBack}>
+            ← Назад
+          </Button>
+          <Button className="flex-1" onClick={handleStart}>
+            {opponent === "online" ? "Далее →" : "Начать расстановку →"}
+          </Button>
+        </div>
+      </div>
+    </>
   );
 }

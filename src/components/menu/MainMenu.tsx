@@ -20,7 +20,7 @@ export default function MainMenu({ onKidsPlay, onPlay, onStats, onCollection }: 
     <motion.div
       initial={false}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center"
+      className="flex flex-col items-center justify-center min-h-0 py-6 px-4 text-center"
     >
       <motion.div
         animate={{ y: [0, -8, 0] }}

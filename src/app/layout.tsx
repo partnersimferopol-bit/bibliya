@@ -25,7 +25,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru">
-      <body className="antialiased min-h-screen min-h-[100dvh] overflow-x-hidden">
+      <body className="antialiased min-h-[100dvh] overflow-x-hidden overflow-y-auto">
         <VkInit />
         {children}
       </body>
